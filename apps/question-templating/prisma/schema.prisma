@@ -1,0 +1,92 @@
+datasource postgres {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  createdAt DateTime @default(now())
+  firstName String?
+  id        String   @id @default(cuid())
+  lastName  String?
+  password  String
+  roles     Json
+  updatedAt DateTime @updatedAt
+  username  String   @unique
+}
+
+model Template {
+  content           Content[]
+  createdAt         DateTime           @default(now())
+  description       String
+  id                String             @id @default(cuid())
+  templateLanguages TemplateLanguage[]
+  updatedAt         DateTime           @updatedAt
+}
+
+model Content {
+  audioLink         String?
+  content           String?
+  contentType       EnumContentContentType
+  createdAt         DateTime               @default(now())
+  id                String                 @id @default(cuid())
+  language          Language               @relation(fields: [languageId], references: [id])
+  languageId        String
+  questionTemplates Template[]
+  status            EnumContentStatus
+  updatedAt         DateTime               @updatedAt
+}
+
+model Language {
+  code                     String             @unique
+  createdAt                DateTime           @default(now())
+  description              String
+  id                       String             @id @default(cuid())
+  questionTemplateContents Content[]
+  templateLanguages        TemplateLanguage[]
+  updatedAt                DateTime           @updatedAt
+}
+
+model TemplateLanguage {
+  createdAt DateTime   @default(now())
+  id        String     @id @default(cuid())
+  language  Language[]
+  template  Template[]
+  updatedAt DateTime   @updatedAt
+}
+
+model Rating {
+  createdAt   DateTime     @default(now())
+  definition  Definition[]
+  description String
+  id          String       @id @default(cuid())
+  rateFrom    Int
+  rateTo      Int
+  updatedAt   DateTime     @updatedAt
+}
+
+model Definition {
+  createdAt   DateTime @default(now())
+  description Int
+  id          String   @id @default(cuid())
+  rate        Int
+  ratings     Rating[]
+  updatedAt   DateTime @updatedAt
+}
+
+enum EnumContentContentType {
+  Audio
+  Text
+  Html
+}
+
+enum EnumContentStatus {
+  Active
+  Inactive
+  Locked
+  Deleted
+  Archived
+}
